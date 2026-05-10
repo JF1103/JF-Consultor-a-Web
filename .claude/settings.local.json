@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm list *)",
+      "Bash(npm audit *)",
+      "Bash(npm install *)",
+      "Bash(npm uninstall *)",
+      "Bash(node -e \"const next = require\\('./node_modules/next/package.json'\\); console.log\\('next version:', next.version\\); const swc = require\\('./node_modules/@next/swc-win32-x64-msvc/package.json'\\); console.log\\('swc version:', swc.version\\);\")",
+      "Bash(node -e \"try { const swc = require\\('./node_modules/@next/swc-win32-x64-msvc'\\); console.log\\('SWC cargó OK, funciones:', Object.keys\\(swc\\).slice\\(0, 20\\).join\\(', '\\)\\); console.log\\('tiene expandNextJsTemplate:', typeof swc.expandNextJsTemplate\\); } catch\\(e\\) { console.error\\('Error cargando SWC:', e.message\\); }\")",
+      "Bash(npm view *)",
+      "Bash(npm pack *)"
+    ]
+  }
+}
