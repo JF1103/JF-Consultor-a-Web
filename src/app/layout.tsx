@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'JF Consultoría Web — Diseño Web para Emprendedores y Negocios',
     description: 'Diseño web profesional para emprendedores, comercios y profesionales. Webs modernas, responsive y listas para recibir consultas.',
+    url: 'https://jf-consultoria-web.netlify.app/',
     type: 'website',
     locale: 'es_AR',
     siteName: 'JF Consultoría Web',
