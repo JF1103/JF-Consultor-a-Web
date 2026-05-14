@@ -4,28 +4,32 @@ import React, { useEffect, useRef } from 'react';
 const plans = [
   {
     name: 'INICIAL',
-    price: 120,
+    price: 180,
     period: 'USD',
-    planOption: 'Inicial - USD 120',
+    planOption: 'Inicial - USD 180',
     description: 'Ideal para emprendedores que necesitan presencia online clara, simple y profesional.',
+    delivery: '5 días hábiles',
     features: [
       'Landing page de hasta 3 secciones',
       'Diseño responsive (mobile y desktop)',
       'Botón de contacto por WhatsApp',
       'Información del negocio y servicios',
       'Formulario de contacto básico',
+      'Publicación online incluida (Netlify)',
+      'Guía para conectar tu dominio',
     ],
     missing: ['Secciones adicionales', 'Automatizaciones', 'Panel administrativo'],
-    cta: 'Consultar inicial',
+    cta: 'Quiero este plan',
     ctaStyle: 'glass-card glow-hover text-frost',
     featured: false,
   },
   {
     name: 'PROFESIONAL',
-    price: 220,
+    price: 320,
     period: 'USD',
-    planOption: 'Profesional - USD 220',
+    planOption: 'Profesional - USD 320',
     description: 'Pensado para negocios que quieren generar confianza, mostrar sus servicios y recibir más consultas.',
+    delivery: '7 días hábiles',
     features: [
       'Hasta 5 secciones personalizadas',
       'Diseño a medida según tu marca',
@@ -34,6 +38,8 @@ const plans = [
       'SEO on-page básico (título, descripción, etiquetas)',
       'Código limpio y carga rápida',
       'Formulario de contacto',
+      'Publicación online incluida (Netlify)',
+      'Conexión de dominio incluida',
     ],
     missing: ['Tienda online con pagos', 'Panel de administración'],
     cta: 'Quiero este plan',
@@ -43,10 +49,11 @@ const plans = [
   },
   {
     name: 'PREMIUM',
-    price: 380,
+    price: 550,
     period: 'USD',
-    planOption: 'Premium - USD 380',
+    planOption: 'Premium - USD 550',
     description: 'Para marcas, empresas o profesionales que necesitan una web más completa, moderna y preparada para crecer.',
+    delivery: '12 días hábiles',
     features: [
       'Todo lo del plan Profesional, más:',
       'Hasta 8 secciones personalizadas',
@@ -55,10 +62,11 @@ const plans = [
       'SEO on-page completo',
       'Links a redes sociales integrados',
       'Estructura preparada para publicidad online',
+      'Publicación online + conexión de dominio',
       '30 días de soporte post-entrega',
     ],
     missing: [],
-    cta: 'Consultar premium',
+    cta: 'Quiero este plan',
     ctaStyle: 'glass-card sky-glow-hover text-frost',
     featured: false,
   },
@@ -148,6 +156,14 @@ export default function PricingSection() {
                   </span>
                 </div>
 
+                {/* Delivery badge */}
+                <div className="inline-flex items-center gap-1.5 mb-4 bg-frost/5 border border-frost/10 rounded-full px-3 py-1">
+                  <svg className="w-3 h-3 text-sky-DEFAULT shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span className="text-xs text-chrome font-medium">Entrega en {plan.delivery}</span>
+                </div>
+
                 <p className="text-chrome text-sm font-light mb-6">
                   {plan.description}
                 </p>
@@ -186,6 +202,7 @@ export default function PricingSection() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
                   </svg>
                 </button>
+
               </div>
             </div>
           ))}
@@ -194,7 +211,7 @@ export default function PricingSection() {
         {/* Guarantee note */}
         <div className="reveal text-center mt-10">
           <p className="text-chrome-dim text-sm font-light">
-            🔒 <span className="text-chrome">Los precios publicados son valores base expresados en USD.</span> También pueden abonarse en pesos argentinos según la cotización vigente al momento del pago. El dominio y el hosting no están incluidos en ningún plan y se contratan por separado. Funcionalidades adicionales, integraciones o requerimientos especiales se cotizan aparte.
+            🔒 <span className="text-chrome">Todos los planes incluyen la publicación online de tu web.</span> El dominio (ej: tunegocio.com) se contrata por separado y tiene un costo de aproximadamente USD 10–15 por año. El hosting es gratuito. Los precios pueden abonarse en pesos argentinos según la cotización vigente. Funcionalidades adicionales se cotizan aparte.
           </p>
         </div>
       </div>

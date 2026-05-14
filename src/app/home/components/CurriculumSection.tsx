@@ -16,6 +16,7 @@ const modules = [
     alt: 'Ejemplo de landing page profesional moderna para vender un servicio',
     highlight: false,
     span: 'md:col-span-1',
+    planOption: 'Inicial - USD 180',
   },
   {
     id: '02',
@@ -29,6 +30,7 @@ const modules = [
     alt: 'Ejemplo de página web institucional para empresa o comercio',
     highlight: true,
     span: 'md:col-span-1',
+    planOption: 'Profesional - USD 320',
   },
   {
     id: '03',
@@ -42,6 +44,7 @@ const modules = [
     alt: 'Ejemplo de portfolio profesional para freelancer o profesional independiente',
     highlight: false,
     span: 'md:col-span-1',
+    planOption: 'Profesional - USD 320',
   },
   {
     id: '04',
@@ -55,6 +58,7 @@ const modules = [
     alt: 'Ejemplo de página web para comercio local con productos y contacto',
     highlight: false,
     span: 'md:col-span-1',
+    planOption: 'Profesional - USD 320',
   },
   {
     id: '05',
@@ -68,6 +72,7 @@ const modules = [
     alt: 'Ejemplo de sitio web para negocio de servicios con formulario de contacto',
     highlight: false,
     span: 'md:col-span-1',
+    planOption: 'Profesional - USD 320',
   },
   {
     id: '06',
@@ -81,6 +86,7 @@ const modules = [
     alt: 'Ejemplo de página web premium con diseño avanzado y secciones escalables',
     highlight: false,
     span: 'md:col-span-1',
+    planOption: 'Premium - USD 550',
   },
 ];
 
@@ -90,6 +96,11 @@ const stats = [
   { value: '24/7', unit: 'Online', label: 'Tu web siempre disponible' },
   { value: 'SEO', unit: 'Básico', label: 'Lista para Google' },
 ];
+
+function handleCardClick(planOption: string) {
+  window.dispatchEvent(new CustomEvent('planSelected', { detail: planOption }));
+  document.getElementById('download')?.scrollIntoView({ behavior: 'smooth' });
+}
 
 export default function CurriculumSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -166,6 +177,10 @@ export default function CurriculumSection() {
           {modules.map((mod) => (
             <div
               key={mod.id}
+              onClick={() => handleCardClick(mod.planOption)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && handleCardClick(mod.planOption)}
               className={`reveal ${mod.span} glass-card rounded-2xl overflow-hidden glow-hover transition-all duration-500 group cursor-pointer ${
                 mod.highlight
                   ? 'ring-1 ring-periwinkle/40 shadow-[0_0_32px_rgba(123,97,255,0.15)]'
@@ -216,9 +231,16 @@ export default function CurriculumSection() {
                   </span>
                 </div>
 
-                <p className="text-sm text-chrome-dim leading-relaxed">
+                <p className="text-sm text-chrome-dim leading-relaxed mb-4">
                   {mod.description}
                 </p>
+
+                <span className="inline-flex items-center gap-1 text-sky-DEFAULT text-xs font-semibold group-hover:gap-2 transition-all duration-200">
+                  Consultar esta web
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </span>
               </div>
             </div>
           ))}

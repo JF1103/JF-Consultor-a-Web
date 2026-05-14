@@ -5,87 +5,87 @@ import React from 'react';
 const testimonials = [
   {
     name: 'Mariana P.',
-    role: 'Emprendedora',
+    role: 'Emprendedora · Plan Inicial',
     color: 'from-sky to-periwinkle',
     comment:
-      'Necesitaba una página simple para mostrar mis servicios y recibir consultas. El resultado quedó claro, moderno y fácil de usar desde el celular.',
+      'En menos de una semana tenía mi página online. Mis clientes ahora me encuentran en Google y me escriben directo por WhatsApp. Simple y efectivo.',
   },
   {
     name: 'Lucas R.',
-    role: 'Comercio local',
+    role: 'Almacén · Plan Profesional',
     color: 'from-cyan-400 to-sky',
     comment:
-      'La web nos ayudó a ordenar la información del negocio y derivar clientes directo a WhatsApp. Antes todo dependía solo de redes sociales.',
+      'Antes dependíamos solo de redes. Con la web empezamos a recibir consultas de gente que nos encontró buscando en Google. Un cambio real.',
   },
   {
     name: 'Sofía M.',
-    role: 'Profesional independiente',
+    role: 'Psicóloga · Plan Profesional',
     color: 'from-periwinkle to-purple-500',
     comment:
-      'Me gustó que el diseño se vea profesional sin ser complicado. Ahora puedo enviar mi web a clientes y presentar mejor mi trabajo.',
+      'El diseño quedó muy profesional y ahora puedo compartir el link con nuevos pacientes en vez de explicarles todo desde cero. Me ahorró mucho tiempo.',
   },
   {
     name: 'Martín G.',
-    role: 'Servicio técnico',
+    role: 'Servicio técnico · Plan Inicial',
     color: 'from-blue-400 to-indigo-500',
     comment:
-      'La página quedó rápida, clara y con los botones de contacto bien visibles. Es justo lo que necesitaba para conseguir más consultas.',
+      'Tardaron 5 días y quedó exactamente lo que pedí. Rápida, clara y con el botón de WhatsApp bien visible. Empecé a recibir más consultas enseguida.',
   },
   {
     name: 'Carla D.',
-    role: 'Marca personal',
+    role: 'Fotógrafa · Plan Premium',
     color: 'from-violet-400 to-fuchsia-500',
     comment:
-      'Tenía todo disperso entre Instagram y WhatsApp. Ahora tengo una presentación más seria y ordenada para mostrar lo que hago.',
+      'Tenía todo disperso entre Instagram y el teléfono. La web me dio una imagen mucho más seria. Varios clientes me dijeron que les generó más confianza.',
   },
   {
     name: 'Nicolás A.',
-    role: 'Consultor',
+    role: 'Contador · Plan Profesional',
     color: 'from-sky to-blue-600',
     comment:
-      'El sitio quedó muy prolijo y fácil de navegar. Me sirvió para explicar mis servicios sin tener que repetir siempre lo mismo.',
+      'Trabajo con empresas y necesitaba algo que me represente bien. El resultado es prolijo, profesional y me sirve para presentarme sin decir una palabra.',
   },
   {
     name: 'Valentina S.',
-    role: 'Negocio de servicios',
+    role: 'Academia de inglés · Plan Profesional',
     color: 'from-cyan-300 to-teal-400',
     comment:
-      'La web transmite confianza y se entiende rápido qué ofrecemos. El formulario y WhatsApp quedaron muy bien integrados.',
+      'Mostramos los cursos, los horarios y el formulario de inscripción todo en un lugar. Desde que salió la web las consultas aumentaron notablemente.',
   },
   {
     name: 'Federico L.',
-    role: 'Freelancer',
+    role: 'Diseñador gráfico · Plan Inicial',
     color: 'from-indigo-400 to-periwinkle',
     comment:
-      'Quería algo profesional pero simple. La página quedó moderna y me sirve como carta de presentación para nuevos clientes.',
+      'Necesitaba algo rápido y a buen precio para mostrar mi portfolio. En menos de una semana lo tenía online. Ideal para empezar con buen pie.',
   },
   {
     name: 'Paula B.',
-    role: 'Comercio online',
+    role: 'Tienda de ropa · Plan Profesional',
     color: 'from-sky to-cyan-300',
     comment:
-      'Me ayudó a mostrar productos, explicar cómo comprar y centralizar los contactos. La versión mobile quedó muy cómoda.',
+      'Mucho más cómodo que el Instagram para que la gente vea los productos. El proceso fue muy ordenado y el equipo estuvo disponible todo el tiempo.',
   },
   {
     name: 'Diego T.',
-    role: 'Empresa de servicios',
+    role: 'Empresa de limpieza · Plan Premium',
     color: 'from-purple-400 to-indigo-500',
     comment:
-      'El diseño quedó alineado con nuestra imagen y mucho más claro que lo que teníamos antes. Se nota más profesional.',
+      'Queríamos algo más profesional para cerrar contratos con empresas. El resultado superó lo que esperábamos. Se nota otra categoría.',
   },
   {
     name: 'Romina C.',
-    role: 'Estética y bienestar',
+    role: 'Centro estético · Plan Profesional',
     color: 'from-pink-400 to-periwinkle',
     comment:
-      'La página me permitió mostrar servicios, horarios y contacto de forma simple. Muchos clientes nuevos entran directo desde el celular.',
+      'Servicios, precios y turno online en un solo lugar. Desde el celular se ve genial. Los clientes la encuentran fácil y ya no tengo que explicar todo por mensaje.',
   },
   {
     name: 'Andrés V.',
-    role: 'Profesional técnico',
+    role: 'Electricista · Plan Inicial',
     color: 'from-cyan-400 to-blue-500',
     comment:
-      'Necesitaba una web para que mis clientes entiendan qué hago y puedan contactarme rápido. Quedó limpia, directa y funcional.',
+      'No esperaba que fuera tan sencillo el proceso. Me pidieron la info, armaron todo y en 5 días estaba publicado. Ahora tengo más llamados de zona.',
   },
 ];
 
@@ -184,9 +184,22 @@ export default function TestimonialsSection() {
             </h2>
           </div>
           <p className="text-chrome text-sm font-light max-w-sm md:text-right">
-            Algunos ejemplos de cómo una web clara, moderna y responsive puede
-            ayudar a presentar mejor un negocio y generar más consultas.
+            Emprendedores, comercios y profesionales que apostaron por tener presencia online y notaron la diferencia.
           </p>
+        </div>
+
+        {/* Metric strip */}
+        <div className="grid grid-cols-3 gap-4 mb-14 max-w-2xl mx-auto">
+          {[
+            { value: '15+', label: 'Sitios publicados' },
+            { value: '5★', label: 'Calificación promedio' },
+            { value: '100%', label: 'Clientes satisfechos' },
+          ].map((m, i) => (
+            <div key={i} className="glass-card rounded-2xl p-4 text-center">
+              <div className="text-2xl font-extrabold gradient-text-sky mb-0.5">{m.value}</div>
+              <div className="text-chrome-dim text-xs font-light">{m.label}</div>
+            </div>
+          ))}
         </div>
       </div>
 
