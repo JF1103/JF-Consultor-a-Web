@@ -1,15 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const DELIVERY_DAYS: Record<string, number> = {
-  'Inicial - USD 180': 5,
-  'Profesional - USD 320': 7,
-  'Premium - USD 550': 12,
+type PlanKey = 'inicial' | 'profesional' | 'premium';
+
+function formatDateAR(date: Date): string {
+  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  return `${d}/${m}/${date.getFullYear()}`;
+}
+
+function detectPlan(plan: string): PlanKey {
+  const lower = plan.toLowerCase();
+  if (lower.includes('premium')) return 'premium';
+  if (lower.includes('profesional')) return 'profesional';
+  if (lower.includes('inicial')) return 'inicial';
+  return 'profesional';
+}
+
+const DELIVERY_DAYS: Record<PlanKey, number> = {
+  inicial: 5,
+  profesional: 7,
+  premium: 12,
 };
 
-const REVISION_DAYS: Record<string, string> = {
-  'Inicial - USD 180': '-',
-  'Profesional - USD 320': '-',
-  'Premium - USD 550': '30 días',
+const REVISION_DAYS: Record<PlanKey, string> = {
+  inicial: '7 días hábiles',
+  profesional: '15 días hábiles',
+  premium: '30 días hábiles',
 };
 
 function addBusinessDays(date: Date, days: number): Date {
@@ -17,8 +33,8 @@ function addBusinessDays(date: Date, days: number): Date {
   let added = 0;
   while (added < days) {
     result.setDate(result.getDate() + 1);
-    const day = result.getDay();
-    if (day !== 0 && day !== 6) added++;
+    const dow = result.getDay();
+    if (dow !== 0 && dow !== 6) added++;
   }
   return result;
 }
@@ -34,23 +50,22 @@ export async function POST(req: NextRequest) {
     }
 
     const today = new Date();
-    const deliveryDays = DELIVERY_DAYS[body.plan] ?? 7;
-    const deliveryDate = addBusinessDays(today, deliveryDays);
+    const planKey = detectPlan(body.plan ?? '');
+    const deliveryDate = addBusinessDays(today, DELIVERY_DAYS[planKey]);
 
     const payload = {
-      fecha_consulta: today.toLocaleDateString('es-AR'),
+      fecha_consulta: formatDateAR(today),
       nombre: body.nombre,
       whatsapp: body.whatsapp,
       email: body.email || '-',
       plan: body.plan,
       mensaje: body.mensaje,
-      entrega_estimada: deliveryDate.toLocaleDateString('es-AR'),
-      revision_incluida: REVISION_DAYS[body.plan] ?? '-',
-      // columnas de seguimiento — Make.com las enviará vacías para completar manualmente
-      abono_50: '',
-      abono_100: '',
-      web_subida: '',
+      entrega_estimada: formatDateAR(deliveryDate),
+      revision_incluida: REVISION_DAYS[planKey],
       estado: 'Consulta recibida',
+      abono_50: 'No',
+      abono_100: 'No',
+      web_subida: 'No',
     };
 
     const res = await fetch(webhookUrl, {
