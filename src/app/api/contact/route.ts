@@ -68,9 +68,14 @@ export async function POST(req: NextRequest) {
       web_subida: 'No',
     };
 
+    // Opcional: si el webhook de Make está protegido con API Key, se envía en x-make-apikey
+    const apiKey = process.env.MAKE_WEBHOOK_API_KEY?.trim();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (apiKey) headers['x-make-apikey'] = apiKey;
+
     const res = await fetch(webhookUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(payload),
     });
 

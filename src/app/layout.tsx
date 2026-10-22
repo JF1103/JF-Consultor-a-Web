@@ -8,6 +8,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://jfconsultoriaweb.com.ar'),
+  alternates: {
+    canonical: '/',
+  },
   title: 'JF Consultoría Web — Diseño Web para Emprendedores y Negocios',
   description: 'Diseño web profesional para emprendedores, comercios y profesionales. Landing pages, webs institucionales y portfolios. Modernos, responsive y preparados para recibir consultas por WhatsApp.',
   icons: {
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'JF Consultoría Web — Diseño Web para Emprendedores y Negocios',
     description: 'Diseño web profesional para emprendedores, comercios y profesionales. Webs modernas, responsive y listas para recibir consultas.',
-    url: 'https://jf-consultoria-web.netlify.app/',
+    url: 'https://jfconsultoriaweb.com.ar/',
     type: 'website',
     locale: 'es_AR',
     siteName: 'JF Consultoría Web',
@@ -27,6 +31,9 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'JF Consultoría Web — Diseño Web para Emprendedores y Negocios',
     description: 'Diseño web profesional para emprendedores, comercios y profesionales. Webs modernas, responsive y listas para recibir consultas.',
+  },
+  verification: {
+    google: 'whstIi1bpE8wFmpQ04CLmvznyiWvf9cWYr4XDbMJMaY',
   },
 };
 

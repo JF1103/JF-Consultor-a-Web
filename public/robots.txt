@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /api/
 
-Sitemap: https://jfestudiodigital.com/sitemap.xml
+Sitemap: https://jfconsultoriaweb.com.ar/sitemap.xml

@@ -35,3 +35,8 @@ jest-test-results.json
 
 # Optional: if using TurboRepo or monorepo
 turbo/
+
+# Environment variables / secrets (keep .env.local.example tracked)
+.env
+.env.*
+!.env.local.example
