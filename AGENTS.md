@@ -35,7 +35,7 @@ The root `/` redirects to `/home` (configured in `next.config.mjs`). The entire 
 | `CurriculumSection` | Services / portfolio |
 | `PricingSection` | Three pricing tiers in ARS, one-time payment (Inicial $279.900 / Profesional $499.900 / Premium $799.900) — amounts live in `src/lib/pricing.ts` |
 | `WhyChooseSection` | Por qué elegir JF: 4 beneficios (reemplazó a los testimonios) |
-| `DownloadSection` | Contact form — submits via WhatsApp deep link |
+| `DownloadSection` | Contact form — registers the inquiry via `/api/contact` (Make → Google Sheets); does not open WhatsApp |
 | `ToolsSection` | Tech stack display |
 | `MobileStickyBar` | Mobile-only sticky CTA bar |
 
@@ -43,7 +43,7 @@ Shared layout components (`Header`, `Footer`) live in `src/components/`. Reusabl
 
 ### State & data
 
-No global state manager. All state is local React hooks (`useState`, `useRef`, `useEffect`). There is no data fetching — content is hardcoded in components. The contact form in `DownloadSection` constructs a WhatsApp URL with a pre-filled message and opens it via `window.open`.
+No global state manager. All state is local React hooks (`useState`, `useRef`, `useEffect`). Content is hardcoded in components. The contact form in `DownloadSection` POSTs to `/api/contact` and shows success only when the API confirms `{ ok: true }`; on error it keeps the fields and offers WhatsApp as an optional link. WhatsApp buttons (navbar) are a separate channel.
 
 **Prices** are centralized in `src/lib/pricing.ts` (integer ARS amounts, formatted with `es-AR`). Plan option strings such as `Profesional - ARS $499.900` are derived there and shared by `PricingSection`, the demo catalog (`src/app/home/data/demos.ts`) and the contact form. Change prices only in that file. The form also sends a copy to `/api/contact`, which forwards to Make with fixed payload keys (`nombre`, `whatsapp`, `email`, `plan`, `mensaje`); a chosen catalog design is prepended to `mensaje`.
 

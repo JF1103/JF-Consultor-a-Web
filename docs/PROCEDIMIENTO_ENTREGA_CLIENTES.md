@@ -87,7 +87,7 @@ Son dos cosas distintas y no deben mezclarse al comunicarlas:
 
 ## Pendiente de definición comercial
 
-- **Duración del soporte post-entrega por plan.** Hoy la web pública dice "30 días de soporte post-entrega" solo en el plan Premium, mientras que el escenario de Make registra `revision_incluida` de 7, 15 y 30 días hábiles para Inicial, Profesional y Premium. Hay que elegir una política y alinear la web y Make. Ese campo no corresponde a la ronda de ajustes (que es una sola en los tres planes): conviene renombrarlo o redefinirlo cuando se apruebe la política.
+- **Duración del soporte post-entrega por plan.** Hoy la web pública dice "30 días de soporte post-entrega" solo en el plan Premium, y no hay una duración definida para Inicial ni Profesional. Hay que elegir una política. El campo `revision_incluida` que se envía a Make (columna H de la planilla) registra desde 2026-10-27 «1 ronda de ajustes» en los tres planes; no representa el soporte post-entrega.
 - **Qué cubre el soporte:** por ejemplo, corrección de errores y ajustes menores de texto, a diferencia de cambios de diseño o secciones nuevas.
 - **Tiempo de respuesta** a consultas: la web promete "menos de 24 hs".
 - **Precio de los adicionales** más comunes, como la conexión de dominio en el plan Inicial o una sección extra.

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import GridBackdrop from '@/components/GridBackdrop';
 import { buildWhatsAppUrl } from '@/lib/contact';
 import type { SelectedDesign } from '@/app/home/data/demos';
@@ -10,18 +10,28 @@ const DEFAULT_PLAN = PLAN_OPTIONS.profesional;
 
 const planOptions = [...PLAN_KEYS.map((key) => PLAN_OPTIONS[key]), 'No estoy seguro'];
 
+// Tiempo máximo de espera del registro (el servidor corta a los 8 s)
+const REGISTER_TIMEOUT_MS = 12_000;
+
+// success: /api/contact confirmó el registro · error: falló o no respondió a tiempo
+type SubmitStatus = 'idle' | 'sending' | 'success' | 'error';
+
+const EMPTY_FORM = { nombre: '', whatsapp: '', email: '', plan: DEFAULT_PLAN, mensaje: '' };
+
 export default function DownloadSection() {
-  const [formData, setFormData] = useState({
-    nombre: '',
-    whatsapp: '',
-    email: '',
-    plan: DEFAULT_PLAN,
-    mensaje: '',
-  });
+  const [formData, setFormData] = useState(EMPTY_FORM);
 
   const [planOpen, setPlanOpen] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<SubmitStatus>('idle');
+  // Evita dos envíos si se hace doble clic antes de que React vuelva a renderizar
+  const submittingRef = useRef(false);
+  const successRef = useRef<HTMLDivElement>(null);
+  const sending = status === 'sending';
+
+  // Al confirmar el envío, el foco pasa al mensaje para que lo lean los lectores de pantalla
+  useEffect(() => {
+    if (status === 'success') successRef.current?.focus();
+  }, [status]);
   const [selectedDesign, setSelectedDesign] = useState<SelectedDesign | null>(null);
 
   useEffect(() => {
@@ -72,20 +82,24 @@ export default function DownloadSection() {
     if (selectedDesign && selectedDesign.plan !== plan) setSelectedDesign(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSending(true);
-
+  // Alternativa opcional ante un error: abre WhatsApp solo si el usuario hace clic
+  const buildFallbackWhatsAppUrl = () => {
     const designLines = selectedDesign
       ? `\nDiseño: ${selectedDesign.code}\nModelo: ${selectedDesign.name}\nPrecio: ${formatPriceWithCurrency(selectedDesign.price)}`
       : '';
-
-    const mensaje = `Hola, quiero consultar por una página web.
+    return buildWhatsAppUrl(`Hola, quiero consultar por una página web.
 
 Nombre: ${formData.nombre}
 WhatsApp: ${formData.whatsapp}${formData.email ? `\nEmail: ${formData.email}` : ''}
 Plan de interés: ${formData.plan}${designLines}
-Mensaje: ${formData.mensaje}`;
+Mensaje: ${formData.mensaje}`);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setStatus('sending');
 
     // Mismo payload de siempre; el diseño elegido viaja al inicio del mensaje
     const apiBody = selectedDesign
@@ -95,25 +109,32 @@ Mensaje: ${formData.mensaje}`;
         }
       : formData;
 
-    // Abre WhatsApp inmediatamente sin esperar el API
-    window.open(buildWhatsAppUrl(mensaje), '_blank');
-
-    // Envía datos al backend en paralelo (si falla, el cliente ya contactó por WA)
+    // Registro de la consulta: solo se da por enviada si /api/contact lo confirma
+    let registered = false;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REGISTER_TIMEOUT_MS);
     try {
-      await fetch('/api/contact', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(apiBody),
+        signal: controller.signal,
       });
+      const data = await res.json().catch(() => null);
+      registered = res.ok && data?.ok === true;
     } catch {
-      // silencioso — WhatsApp ya abrió
+      registered = false;
+    } finally {
+      clearTimeout(timer);
     }
 
-    setSending(false);
-    setSent(true);
-    setFormData({ nombre: '', whatsapp: '', email: '', plan: DEFAULT_PLAN, mensaje: '' });
-    setSelectedDesign(null);
-    setTimeout(() => setSent(false), 6000);
+    setStatus(registered ? 'success' : 'error');
+    // Si no se confirmó, se conservan los datos para reintentar sin escribirlos de nuevo
+    if (registered) {
+      setFormData(EMPTY_FORM);
+      setSelectedDesign(null);
+    }
+    submittingRef.current = false;
   };
 
   return (
@@ -156,8 +177,8 @@ Mensaje: ${formData.mensaje}`;
                   Respuesta rápida
                 </h3>
                 <p className="text-chrome-dim text-sm font-light leading-relaxed">
-                  Tu consulta se abre directamente en WhatsApp para responderte
-                  sin vueltas.
+                  Tu consulta nos llega al instante y te respondemos por los
+                  datos de contacto que nos dejes.
                 </p>
               </div>
 
@@ -180,7 +201,7 @@ Mensaje: ${formData.mensaje}`;
             </h3>
 
             <p className="text-chrome-dim text-sm font-light mb-8">
-              Completá los datos y enviá tu consulta por WhatsApp.
+              Completá los datos y te contactamos con una propuesta.
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -343,47 +364,89 @@ Mensaje: ${formData.mensaje}`;
                 />
               </div>
 
-              {sent ? (
-                <div className="flex flex-col items-center gap-2 py-3">
-                  <div className="flex items-center gap-2 text-sky font-semibold text-sm">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    ¡Consulta enviada! Revisá WhatsApp para completar el envío.
-                  </div>
-                  <p className="text-chrome-dim text-xs font-light text-center">
-                    Te respondemos en menos de 24 hs.
-                  </p>
-                </div>
-              ) : (
-                <button
-                  type="submit"
-                  disabled={sending}
-                  className="btn-primary w-full flex items-center justify-center gap-3 px-7 py-4 rounded-full text-slate-deep font-bold text-base tracking-wide disabled:opacity-70 disabled:cursor-not-allowed"
+              {/* Error: se conservan los datos y se puede reintentar */}
+              {status === 'error' && (
+                <div
+                  role="alert"
+                  data-submit-status="error"
+                  className="rounded-2xl border border-periwinkle/30 bg-periwinkle/[0.07] px-5 py-4 space-y-2"
                 >
-                  {sending ? (
-                    <>
-                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                      </svg>
-                      Enviando...
-                    </>
-                  ) : (
-                    <>
-                      Enviar consulta por WhatsApp
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                      </svg>
-                    </>
-                  )}
-                </button>
+                  <p className="flex items-start gap-2 text-frost font-semibold text-sm">
+                    <svg className="w-5 h-5 shrink-0 text-periwinkle" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/>
+                    </svg>
+                    No pudimos enviar tu consulta. Por favor, intentá nuevamente.
+                  </p>
+                  <p className="text-chrome-dim text-xs font-light leading-relaxed">
+                    Tus datos siguen cargados. Si preferís, también podés escribirnos por WhatsApp.
+                  </p>
+                  <a
+                    href={buildFallbackWhatsAppUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center min-h-[44px] text-sm font-semibold text-sky underline underline-offset-4 decoration-sky/40 hover:decoration-sky focus:outline-none focus-visible:ring-2 focus-visible:ring-sky/70 rounded"
+                  >
+                    Escribir por WhatsApp
+                    <span className="sr-only"> (opcional, se abre en una pestaña nueva)</span>
+                  </a>
+                </div>
               )}
 
-              {!sent && (
-                <p className="text-center text-xs text-chrome-dim font-light">
-                  Sin compromiso. Te respondemos con una propuesta según tu necesidad.
-                </p>
+              {status === 'success' ? (
+                <div
+                  ref={successRef}
+                  tabIndex={-1}
+                  role="status"
+                  data-submit-status="success"
+                  className="rounded-2xl border border-sky/25 bg-sky/[0.06] px-5 py-4 space-y-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky/50"
+                >
+                  <p className="flex items-start gap-2 text-sky font-semibold text-base">
+                    <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    ¡Mensaje enviado correctamente!
+                  </p>
+                  <p className="text-chrome text-sm font-light leading-relaxed">
+                    Recibimos tu consulta. Nos pondremos en contacto con vos a través de los datos que nos dejaste.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setStatus('idle')}
+                    className="inline-flex items-center min-h-[44px] text-sm text-chrome-dim hover:text-frost underline underline-offset-4 decoration-frost/20 hover:decoration-frost/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky/70 rounded"
+                  >
+                    Hacer otra consulta
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <button
+                    type="submit"
+                    disabled={sending}
+                    aria-busy={sending}
+                    className="btn-primary w-full flex items-center justify-center gap-3 px-7 py-4 rounded-full text-slate-deep font-bold text-base tracking-wide disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {sending ? (
+                      <>
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        Enviando...
+                      </>
+                    ) : (
+                      <>
+                        Enviar consulta
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>
+                        </svg>
+                      </>
+                    )}
+                  </button>
+
+                  <p className="text-center text-xs text-chrome-dim font-light">
+                    Sin compromiso. Te respondemos con una propuesta según tu necesidad.
+                  </p>
+                </>
               )}
             </form>
           </div>

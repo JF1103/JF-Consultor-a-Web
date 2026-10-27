@@ -120,7 +120,7 @@ export default function FAQSection() {
               <span className="font-display italic font-light gradient-text-sky">Sin letra chica.</span>
             </h2>
             <p className="text-chrome text-base font-light leading-relaxed mb-8">
-              Si tu pregunta no está acá, escribinos por WhatsApp y te respondemos enseguida.
+              Si tu pregunta no está acá, dejanos tu consulta en el formulario o escribinos por WhatsApp.
             </p>
             <button
               type="button"
