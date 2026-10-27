@@ -1,5 +1,4 @@
-'use client';
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 
 const logos = [
   { name: 'Diseño Web', abbr: 'DISEÑO WEB', color: '#56CCF2' },
@@ -14,41 +13,31 @@ const logos = [
   { name: 'Automatizaciones', abbr: 'AUTOMATIZACIÓN', color: '#F7FAFC' },
 ];
 
-export default function LogoBar() {
-  const trackRef = useRef<HTMLDivElement>(null);
+interface LogoBarProps {
+  // Solo una cinta expone la lista a lectores de pantalla; el resto es decorativo
+  announce?: boolean;
+}
 
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    let pos = 0;
-    let raf: number;
-    const speed = 0.4;
-
-    const animate = () => {
-      pos -= speed;
-      const totalW = track.scrollWidth / 2;
-      if (Math.abs(pos) >= totalW) pos = 0;
-      track.style.transform = `translateX(${pos}px)`;
-      raf = requestAnimationFrame(animate);
-    };
-    raf = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  const allLogos = [...logos, ...logos]; // duplicate for seamless loop
-
-  return (
-    <div className="logo-strip overflow-hidden py-5 border-y border-frost/5">
-      <div ref={trackRef} className="flex items-center gap-12 whitespace-nowrap will-change-transform">
-        {allLogos.map((logo, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-3 shrink-0 group"
-          >
+// Cinta animada de servicios entre secciones. Movimiento continuo por CSS (funciona aunque falle
+// el JS) que se detiene solo con prefers-reduced-motion.
+export default function LogoBar({ announce = false }: LogoBarProps) {
+  // Dos copias idénticas para el bucle continuo; la segunda (y las cintas decorativas) se ocultan a lectores
+  const list = (copy: number) => {
+    const hidden = !announce || copy > 0;
+    return (
+      <ul
+        key={copy}
+        aria-hidden={hidden ? true : undefined}
+        aria-label={hidden ? undefined : 'Servicios de JF Consultoría Web'}
+        className="flex items-center gap-12 pr-12 shrink-0"
+      >
+        {logos.map((logo) => (
+          <li key={logo.abbr} className="flex items-center gap-3 shrink-0 group">
             {/* Seal icon */}
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center"
               style={{ background: `${logo.color}18`, border: `1px solid ${logo.color}30` }}
+              aria-hidden="true"
             >
               <span className="text-[8px] font-bold" style={{ color: logo.color }}>✦</span>
             </div>
@@ -58,8 +47,19 @@ export default function LogoBar() {
             >
               {logo.abbr}
             </span>
-          </div>
+          </li>
         ))}
+      </ul>
+    );
+  };
+
+  return (
+    <div className="services-strip py-3">
+      <div className="logo-strip overflow-hidden">
+        <div className="services-marquee flex w-max whitespace-nowrap">
+          {list(0)}
+          {list(1)}
+        </div>
       </div>
     </div>
   );

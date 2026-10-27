@@ -18,7 +18,7 @@ npm run type-check   # TypeScript validation (tsc --noEmit)
 
 ## Architecture
 
-This is a **Next.js 15 / React 19** single-page landing site for "JF Estudio Digital", a Spanish-language web design agency. There are no API routes — all interactivity is client-side.
+This is a **Next.js 15 / React 19** single-page landing site for "JF Consultoría Web", a Spanish-language (Argentina) web design agency. Commercial conditions and the client delivery process are documented in `docs/PROCEDIMIENTO_ENTREGA_CLIENTES.md`; keep page copy consistent with it. There are no API routes — all interactivity is client-side.
 
 ### Routing
 
@@ -33,8 +33,8 @@ The root `/` redirects to `/home` (configured in `next.config.mjs`). The entire 
 | `HeroSection` | Above-the-fold banner |
 | `LogoBar` | Logo/brand separator |
 | `CurriculumSection` | Services / portfolio |
-| `PricingSection` | Three pricing tiers ($120/$220/$380) |
-| `TestimonialsSection` | Social proof |
+| `PricingSection` | Three pricing tiers in ARS, one-time payment (Inicial $279.900 / Profesional $499.900 / Premium $799.900) — amounts live in `src/lib/pricing.ts` |
+| `WhyChooseSection` | Por qué elegir JF: 4 beneficios (reemplazó a los testimonios) |
 | `DownloadSection` | Contact form — submits via WhatsApp deep link |
 | `ToolsSection` | Tech stack display |
 | `MobileStickyBar` | Mobile-only sticky CTA bar |
@@ -44,6 +44,8 @@ Shared layout components (`Header`, `Footer`) live in `src/components/`. Reusabl
 ### State & data
 
 No global state manager. All state is local React hooks (`useState`, `useRef`, `useEffect`). There is no data fetching — content is hardcoded in components. The contact form in `DownloadSection` constructs a WhatsApp URL with a pre-filled message and opens it via `window.open`.
+
+**Prices** are centralized in `src/lib/pricing.ts` (integer ARS amounts, formatted with `es-AR`). Plan option strings such as `Profesional - ARS $499.900` are derived there and shared by `PricingSection`, the demo catalog (`src/app/home/data/demos.ts`) and the contact form. Change prices only in that file. The form also sends a copy to `/api/contact`, which forwards to Make with fixed payload keys (`nombre`, `whatsapp`, `email`, `plan`, `mensaje`); a chosen catalog design is prepended to `mensaje`.
 
 ### Styling
 

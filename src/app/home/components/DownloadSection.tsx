@@ -1,44 +1,62 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import GridBackdrop from '@/components/GridBackdrop';
 import { buildWhatsAppUrl } from '@/lib/contact';
+import type { SelectedDesign } from '@/app/home/data/demos';
+import { PLAN_KEYS, PLAN_OPTIONS, formatPriceWithCurrency } from '@/lib/pricing';
 
-const planOptions = [
-  'Inicial - USD 180',
-  'Profesional - USD 320',
-  'Premium - USD 550',
-  'No estoy seguro',
-];
+const DEFAULT_PLAN = PLAN_OPTIONS.profesional;
+
+const planOptions = [...PLAN_KEYS.map((key) => PLAN_OPTIONS[key]), 'No estoy seguro'];
 
 export default function DownloadSection() {
   const [formData, setFormData] = useState({
     nombre: '',
     whatsapp: '',
     email: '',
-    plan: 'Profesional - USD 320',
+    plan: DEFAULT_PLAN,
     mensaje: '',
   });
 
   const [planOpen, setPlanOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [selectedDesign, setSelectedDesign] = useState<SelectedDesign | null>(null);
 
   useEffect(() => {
     const handlePlanSelected = (e: Event) => {
       const selected = (e as CustomEvent<string>).detail;
       if (planOptions.includes(selected)) {
         setFormData((prev) => ({ ...prev, plan: selected }));
+        setSelectedDesign(null);
       }
     };
+    // Diseño elegido desde el catálogo de demos (CurriculumSection)
+    const handleDesignSelected = (e: Event) => {
+      const design = (e as CustomEvent<SelectedDesign>).detail;
+      if (design && planOptions.includes(design.plan)) {
+        setFormData((prev) => ({ ...prev, plan: design.plan }));
+        setSelectedDesign(design);
+      }
+    };
+    // "Quiero una web personalizada" desde el catálogo: sin modelo preseleccionado
+    const handleCustomRequested = () => setSelectedDesign(null);
     window.addEventListener('planSelected', handlePlanSelected);
-    return () => window.removeEventListener('planSelected', handlePlanSelected);
+    window.addEventListener('designSelected', handleDesignSelected);
+    window.addEventListener('customDesignRequested', handleCustomRequested);
+    return () => {
+      window.removeEventListener('planSelected', handlePlanSelected);
+      window.removeEventListener('designSelected', handleDesignSelected);
+      window.removeEventListener('customDesignRequested', handleCustomRequested);
+    };
   }, []);
 
   const inputClass =
-    'w-full rounded-full px-5 py-3 text-frost text-sm placeholder:text-chrome-dim bg-frost/[0.04] border border-frost/10 focus:outline-none focus:border-sky-DEFAULT/50 focus-visible:ring-2 focus-visible:ring-sky-DEFAULT/40 transition-colors';
+    'w-full rounded-full px-5 py-3 text-frost text-sm placeholder:text-chrome-dim bg-frost/[0.04] border border-frost/10 focus:outline-none focus:border-sky/50 focus-visible:ring-2 focus-visible:ring-sky/40 transition-colors';
 
   const textareaClass =
-    'w-full rounded-2xl px-5 py-4 text-frost text-sm placeholder:text-chrome-dim bg-frost/[0.04] border border-frost/10 focus:outline-none focus:border-sky-DEFAULT/50 focus-visible:ring-2 focus-visible:ring-sky-DEFAULT/40 transition-colors resize-none';
+    'w-full rounded-2xl px-5 py-4 text-frost text-sm placeholder:text-chrome-dim bg-frost/[0.04] border border-frost/10 focus:outline-none focus:border-sky/50 focus-visible:ring-2 focus-visible:ring-sky/40 transition-colors resize-none';
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -51,18 +69,31 @@ export default function DownloadSection() {
 
   const handlePlanChange = (plan: string) => {
     setFormData({ ...formData, plan });
+    if (selectedDesign && selectedDesign.plan !== plan) setSelectedDesign(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSending(true);
 
+    const designLines = selectedDesign
+      ? `\nDiseño: ${selectedDesign.code}\nModelo: ${selectedDesign.name}\nPrecio: ${formatPriceWithCurrency(selectedDesign.price)}`
+      : '';
+
     const mensaje = `Hola, quiero consultar por una página web.
 
 Nombre: ${formData.nombre}
 WhatsApp: ${formData.whatsapp}${formData.email ? `\nEmail: ${formData.email}` : ''}
-Plan de interés: ${formData.plan}
+Plan de interés: ${formData.plan}${designLines}
 Mensaje: ${formData.mensaje}`;
+
+    // Mismo payload de siempre; el diseño elegido viaja al inicio del mensaje
+    const apiBody = selectedDesign
+      ? {
+          ...formData,
+          mensaje: `Diseño: ${selectedDesign.code} · Modelo: ${selectedDesign.name} · Precio: ${formatPriceWithCurrency(selectedDesign.price)}\n${formData.mensaje}`,
+        }
+      : formData;
 
     // Abre WhatsApp inmediatamente sin esperar el API
     window.open(buildWhatsAppUrl(mensaje), '_blank');
@@ -72,7 +103,7 @@ Mensaje: ${formData.mensaje}`;
       await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(apiBody),
       });
     } catch {
       // silencioso — WhatsApp ya abrió
@@ -80,14 +111,14 @@ Mensaje: ${formData.mensaje}`;
 
     setSending(false);
     setSent(true);
-    setFormData({ nombre: '', whatsapp: '', email: '', plan: 'Profesional - USD 320', mensaje: '' });
+    setFormData({ nombre: '', whatsapp: '', email: '', plan: DEFAULT_PLAN, mensaje: '' });
+    setSelectedDesign(null);
     setTimeout(() => setSent(false), 6000);
   };
 
   return (
-    <section id="download" className="py-24 sm:py-32 relative overflow-hidden">
-      <div className="section-divider mb-24" />
-
+    <section id="download" className="py-14 sm:py-16 lg:py-20 relative isolate overflow-hidden">
+      <GridBackdrop />
       {/* Atmospheric background */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="blob-sky absolute top-[-20%] left-[20%] w-[280px] h-[280px] sm:w-[420px] sm:h-[420px] lg:w-[600px] lg:h-[600px] rounded-full opacity-20" />
@@ -99,7 +130,7 @@ Mensaje: ${formData.mensaje}`;
           {/* Left content */}
           <div>
             <div className="inline-flex items-center gap-2 glass-card px-4 py-2 rounded-full mb-8">
-              <span className="w-2 h-2 rounded-full bg-sky-DEFAULT animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-sky animate-pulse" />
               <span className="text-xs font-bold text-chrome uppercase tracking-widest">
                 Contacto directo
               </span>
@@ -206,6 +237,30 @@ Mensaje: ${formData.mensaje}`;
                 />
               </div>
 
+              {selectedDesign && (
+                <div
+                  role="status"
+                  className="glass-card-bright rounded-2xl px-4 py-3 flex items-center justify-between gap-3"
+                >
+                  <p className="text-sm text-chrome min-w-0">
+                    <span className="block text-[10px] font-bold uppercase tracking-widest text-sky mb-0.5">
+                      Diseño elegido
+                    </span>
+                    <span className="text-frost font-semibold">{selectedDesign.code}</span>
+                    {' · '}
+                    {selectedDesign.name}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDesign(null)}
+                    aria-label="Quitar diseño elegido"
+                    className="shrink-0 min-h-[44px] px-3 rounded-full text-xs font-semibold text-chrome-dim hover:text-frost hover:bg-frost/[0.06] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky/70"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              )}
+
               <div className="relative">
                 <label htmlFor="field-plan" className="block text-chrome text-sm font-semibold mb-3">
                   Plan de interés
@@ -217,7 +272,7 @@ Mensaje: ${formData.mensaje}`;
                   onClick={() => setPlanOpen(!planOpen)}
                   aria-haspopup="listbox"
                   aria-expanded={planOpen}
-                  className="w-full rounded-full px-5 py-3 text-frost text-sm bg-frost/[0.04] border border-frost/10 focus:outline-none focus:border-sky-DEFAULT/50 focus-visible:ring-2 focus-visible:ring-sky-DEFAULT/40 transition-colors flex items-center justify-between"
+                  className="w-full rounded-full px-5 py-3 text-frost text-sm bg-frost/[0.04] border border-frost/10 focus:outline-none focus:border-sky/50 focus-visible:ring-2 focus-visible:ring-sky/40 transition-colors flex items-center justify-between"
                 >
                   <span>{formData.plan}</span>
 
@@ -258,7 +313,7 @@ Mensaje: ${formData.mensaje}`;
                           }}
                           className={`w-full px-5 py-3 text-left text-sm transition-colors ${
                             isSelected
-                              ? 'bg-sky-DEFAULT/10 text-frost'
+                              ? 'bg-sky/10 text-frost'
                               : 'text-chrome hover:bg-frost/[0.06] hover:text-frost'
                           }`}
                         >
@@ -290,7 +345,7 @@ Mensaje: ${formData.mensaje}`;
 
               {sent ? (
                 <div className="flex flex-col items-center gap-2 py-3">
-                  <div className="flex items-center gap-2 text-sky-DEFAULT font-semibold text-sm">
+                  <div className="flex items-center gap-2 text-sky font-semibold text-sm">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>

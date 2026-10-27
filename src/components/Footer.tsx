@@ -1,25 +1,51 @@
 'use client';
 import React from 'react';
 import AppLogo from '@/components/ui/AppLogo';
+import { navItems } from '@/components/Header';
+import { scrollToSection } from '@/lib/scroll';
+
+// Mismos destinos que el navbar
+const footerLinks = navItems.map(({ label, target }) => ({ label, target }));
+
+const focusRing =
+  'focus:outline-none focus-visible:ring-2 focus-visible:ring-sky/70 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-deep';
+
+const handleLink = (target: string) => (e: React.MouseEvent) => {
+  e.preventDefault();
+  scrollToSection(target);
+};
 
 export default function Footer() {
   return (
     <footer className="border-t border-frost/5 py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Pattern 3 — Vercel Horizontal Flow */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-          <AppLogo size={32} text="JF Consultoría Web" iconName="AcademicCapIcon" className="text-sky-DEFAULT" />
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+          <a
+            href="#home"
+            onClick={handleLink('home')}
+            aria-label="JF Consultoría Web, ir al inicio"
+            className={`${focusRing} rounded-lg min-h-[44px] flex items-center`}
+          >
+            <AppLogo size={32} text="JF Consultoría Web" className="text-frost" />
+          </a>
 
-          <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-chrome-dim">
-            <a href="#home" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-frost transition-colors cursor-pointer">Inicio</a>
-            <span className="text-slate-light hidden sm:inline">·</span>
-            <a href="#curriculum" className="hover:text-frost transition-colors">Servicios</a>
-            <span className="text-slate-light hidden sm:inline">·</span>
-            <a href="#testimonials" className="hover:text-frost transition-colors">Opiniones</a>
-            <span className="text-slate-light hidden sm:inline">·</span>
-            <a href="#pricing" className="hover:text-frost transition-colors">Planes</a>
-            <span className="text-slate-light hidden sm:inline">·</span>
-            <a href="#download" className="hover:text-frost transition-colors">Contacto</a>
+          <nav
+            aria-label="Pie de página"
+            className="grid grid-cols-2 justify-items-center sm:flex sm:flex-wrap sm:items-center sm:justify-center gap-x-6 gap-y-1 text-sm font-medium text-chrome-dim"
+          >
+            {footerLinks.map((link, i) => (
+              <React.Fragment key={link.target}>
+                {i > 0 && <span className="text-slate-light hidden sm:inline" aria-hidden="true">·</span>}
+                <a
+                  href={`#${link.target}`}
+                  onClick={handleLink(link.target)}
+                  className={`${focusRing} inline-flex items-center min-h-[44px] rounded hover:text-frost transition-colors`}
+                >
+                  {link.label}
+                </a>
+              </React.Fragment>
+            ))}
           </nav>
 
          <div className="flex items-center gap-4">
@@ -28,7 +54,7 @@ export default function Footer() {
     target="_blank"
     rel="noopener noreferrer"
     aria-label="LinkedIn"
-    className="text-chrome-dim hover:text-sky-DEFAULT transition-colors"
+    className={`${focusRing} inline-flex items-center justify-center w-11 h-11 rounded-full text-chrome-dim hover:text-sky transition-colors`}
   >
     <svg
       className="w-5 h-5"
